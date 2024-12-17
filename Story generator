@@ -1,0 +1,36 @@
+import random
+
+story_prompts = [
+    "Write a story about a <adjective> <character> who discovers a <object> in <setting>.",
+    "Imagine a world where <event> happens, and write a story about <character>'s journey.",
+    "<character> wakes up in <setting> with no memory of how they got there. Write their story."
+]
+
+word_pool = {
+    "adjective": ["brave", "mysterious", "curious"],
+    "character": ["scientist", "artist", "detective"],
+    "object": ["magic key", "hidden map", "ancient artifact"],
+    "setting": ["a dense forest", "an abandoned castle", "a futuristic city"],
+    "event": ["time stops", "gravity disappears", "everyone can fly"]
+}
+
+template = random.choice(story_prompts)
+while "<" in template:
+    start = template.index("<")
+    end = template.index(">")
+    placeholder = template[start + 1:end]
+    replacement = random.choice(word_pool.get(placeholder, [""]))
+    template = template[:start] + replacement + template[end + 1:]
+
+print("\nStory Prompt:")
+print(template)
+
+print("\nWrite your story below (type 'END' on a new line to finish):")
+story = []
+while True:
+    line = input()
+    if line.strip().upper() == "END":
+        break
+    story.append(line)
+
+story_text = "\n".join(story)
