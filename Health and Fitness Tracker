@@ -1,0 +1,241 @@
+package FitnessTracker;
+import java.io.*;
+import java.util.*;
+
+public class User {
+    private String name;
+    private int age;
+    private double height;
+    private double weight;
+    private double waterIntake;
+    private List<String> meals = new ArrayList<>();
+    private List<Integer> mealCalories = new ArrayList<>();
+    private List<String> exercises = new ArrayList<>();
+    private String mood;
+    private String goalType;
+    private double targetWeight;
+
+    public User(String name, int age, double height, double weight) {
+        this.name = name;
+        this.age = age;
+        this.height = height;
+        this.weight = weight;
+    }
+
+    public void addMeal(String meal, int calories) {
+        meals.add(meal);
+        mealCalories.add(calories);
+    }
+
+    public void addExercise(String exercise) {
+        exercises.add(exercise);
+    }
+
+    public void addWater(double amount) {
+        waterIntake += amount;
+    }
+
+    public void setMood(String mood) {
+        this.mood = mood;
+    }
+
+    public void setGoal(String type, double targetWeight) {
+        this.goalType = type;
+        this.targetWeight = targetWeight;
+    }
+
+    public double calculateBMI() {
+        return weight / (height * height);
+    }
+
+    public void displaySummary() {
+        System.out.println("\n--- Health Summary ---");
+        System.out.println("Name: " + name);
+        System.out.println("Age: " + age);
+        System.out.println("Height: " + height + " m");
+        System.out.println("Current Weight: " + weight + " kg");
+        System.out.printf("BMI: %.2f (%s)\n", calculateBMI(), getBMICategory());
+
+        if (goalType != null) {
+            System.out.println("Goal: " + goalType + " to " + targetWeight + " kg");
+            System.out.printf("Progress: %.2f kg remaining\n", Math.abs(weight - targetWeight));
+        }
+
+        if (mood != null) {
+            System.out.println("Today's Mood: " + mood);
+        }
+
+        if (waterIntake < 2.0) {
+            System.out.println("Reminder: Drink more water! You've had only " + waterIntake + "L today.");
+        } else {
+            System.out.println("Great job staying hydrated! " + waterIntake + "L consumed.");
+        }
+
+        int totalCalories = mealCalories.stream().mapToInt(Integer::intValue).sum();
+        System.out.println("Meals logged: " + meals);
+        System.out.println("Total Calories: " + totalCalories + " kcal");
+        System.out.println("Exercises: " + exercises);
+    }
+
+    private String getBMICategory() {
+        double bmi = calculateBMI();
+        if (bmi < 18.5) return "Underweight";
+        else if (bmi < 25) return "Normal";
+        else if (bmi < 30) return "Overweight";
+        else return "Obese";
+    }
+
+    public void saveProgress() {
+        try (PrintWriter writer = new PrintWriter(new FileWriter("progress.txt", true))) {
+            writer.println("Week: " + Calendar.getInstance().get(Calendar.WEEK_OF_YEAR));
+            writer.printf("Name: %s, Weight: %.2f, BMI: %.2f, Mood: %s\n",
+                    name, weight, calculateBMI(), mood != null ? mood : "N/A");
+            writer.println("--------------------------------------------");
+            System.out.println("Progress saved to progress.txt!");
+        } catch (IOException e) {
+            System.out.println("Error saving progress.");
+        }
+    }
+}
+
+package FitnessTracker;
+public class Meal {
+    private String name;
+    private int calories;
+
+    public Meal(String name, int calories) {
+        this.name = name;
+        this.calories = calories;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getCalories() {
+        return calories;
+    }
+}
+
+package FitnessTracker;
+
+public class Exercise {
+    private String name;
+    private int caloriesBurned;
+
+    public Exercise(String name, int caloriesBurned) {
+        this.name = name;
+        this.caloriesBurned = caloriesBurned;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getCaloriesBurned() {
+        return caloriesBurned;
+    }
+}
+
+package FitnessTracker;
+import java.util.*;
+
+public class HealthTracker {
+    private static Scanner scanner = new Scanner(System.in);
+    private static User user;
+
+    public static void main(String[] args) {
+        System.out.println("Welcome to Health & Fitness Tracker!");
+        setupUser();
+
+        while (true) {
+            showMenu();
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+            switch (choice) {
+                case 1 -> logMeal();
+                case 2 -> logExercise();
+                case 3 -> logWater();
+                case 4 -> dailyCheckIn();
+                case 5 -> viewSummary();
+                case 6 -> setGoal();
+                case 7 -> saveWeeklyProgress();
+                case 8 -> {
+                    System.out.println("Thank you! Stay healthy.");
+                    return;
+                }
+                default -> System.out.println("Invalid option.");
+            }
+        }
+    }
+
+    private static void setupUser() {
+        System.out.print("Enter your name: ");
+        String name = scanner.nextLine();
+        System.out.print("Enter age: ");
+        int age = scanner.nextInt();
+        System.out.print("Enter height (in meters): ");
+        double height = scanner.nextDouble();
+        System.out.print("Enter current weight (in kg): ");
+        double weight = scanner.nextDouble();
+        scanner.nextLine();
+        user = new User(name, age, height, weight);
+    }
+
+    private static void showMenu() {
+        System.out.println("\n1. Log Meal");
+        System.out.println("2. Log Exercise");
+        System.out.println("3. Log Water Intake");
+        System.out.println("4. Daily Mood Check-In");
+        System.out.println("5. View Summary");
+        System.out.println("6. Set Fitness Goal");
+        System.out.println("7. Save Weekly Progress");
+        System.out.println("8. Exit");
+        System.out.print("Enter your choice: ");
+    }
+
+    private static void logMeal() {
+        System.out.print("Enter meal name: ");
+        String meal = scanner.nextLine();
+        System.out.print("Enter approximate calories: ");
+        int calories = scanner.nextInt();
+        scanner.nextLine();
+        user.addMeal(meal, calories);
+    }
+
+    private static void logExercise() {
+        System.out.print("Enter exercise: ");
+        String exercise = scanner.nextLine();
+        user.addExercise(exercise);
+    }
+
+    private static void logWater() {
+        System.out.print("Enter water intake (in liters): ");
+        double water = scanner.nextDouble();
+        scanner.nextLine();
+        user.addWater(water);
+    }
+
+    private static void dailyCheckIn() {
+        System.out.print("How are you feeling today? (e.g., Energetic, Tired): ");
+        String mood = scanner.nextLine();
+        user.setMood(mood);
+    }
+
+    private static void viewSummary() {
+        user.displaySummary();
+    }
+
+    private static void setGoal() {
+        System.out.print("Set your goal (Lose/Gain/Maintain): ");
+        String type = scanner.nextLine();
+        System.out.print("Enter target weight (in kg): ");
+        double targetWeight = scanner.nextDouble();
+        scanner.nextLine();
+        user.setGoal(type, targetWeight);
+    }
+
+    private static void saveWeeklyProgress() {
+        user.saveProgress();
+    }
+}
